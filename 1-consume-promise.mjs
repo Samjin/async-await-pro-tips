@@ -1,15 +1,15 @@
 import fetch from 'node-fetch';
 
-const promise = fetch('https://jsonplaceholder.typicode.com/todos/1');
+const promise = fetch('https://jsonplaceholder.typicode.com/todoss/1');
 
 promise
   .then(res => res.json())
   .then(todo => {
     throw new Error('uh oh');
-    return todo;
+    return todo; //won't run
   })
   .then(todo => console.log('😛', todo.title))
   .catch(err => console.error('😭', err));
 
-console.log('🥪 Synchronous');
+console.log('🥪 Synchronous'); //this runs first
 
