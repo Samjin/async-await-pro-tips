@@ -18,7 +18,7 @@ https://www.youtube.com/watch?v=PNa9OMajw9w
 -------------------------------------------------------- */
 // Event loop phases. Callbacks of each phases executed before next phase
 1. setTimeout -> callbacks -> nextTick(MacroTask) queue -> dispatch to corresponding phase
-2. I/O request -> callbacks (Network/Disk/Child process/Promise etc) -> MicroTask queue -> dispatch to corresponding phase
+2. I/O request -> callbacks (Network/Disk/Child process/Promise etc) -> keep polling IO -> MicroTask queue -> dispatch to corresponding phase
 3. setImmediate -> callbacks -> MicroTask queue -> to corresponding phase
 4. close event -> callbacks -> nextTick(MacroTask) queue -> dispatch to corresponding phase
 // process.exit()
@@ -31,32 +31,27 @@ https://www.youtube.com/watch?v=PNa9OMajw9w
    But this doesn't change current Phase in the main event loop.
 
    fs.readFile(__filename,          //1. ReadFile is IO request, so we are at I/O phase 
-        () => {                     //2. Callback is register as an event in I/O queue, if no other Node event is in IO phase 
-                                    //   such as another readFile, then queues are being processed
-            setTimeout(() => {      //3. Add to nextTick MacroTask queues
-                console.log('timeout')
+        () => {                     //2. Once the file is read, callback is register as an event in I/O queue (not macrotask queue)
+                                    //   if no other #1 events, Node will start execute IO queue, in this case the #2 callback
+
+            setTimeout(() => {      //3. Add to Timer queue, then register callback as event to "nextTick MacroTask queues"
+                console.log('timeout') // 6. Immediate phase finishes, then back to Timer phase and callback is handled.
             }, 0);
-            setImmediate(() => {    //3. Add to IO MicroTask queues(like promise)
-                console.log('immediate')
-        })
+            
+            setImmediate(() => {    //3. Add to Immediate queue as event, then add to "IO MicroTask queues(like promise)" 
+                                    //4. Eventloop goes to next phase -> Immediate phase since we were at I/O phase, and no other IO events in IO queue(IO keeps polling)
+                console.log('immediate') //5. callback is handled 
+            })
     });
 
 
 
-2. Each callback could have its own eventloop for nextTick loop and resolved Promise loop. Promise loop is nested within nextTick loop.
+2. NextTick queue(Macro callbacks) is always run before "Micro callbacks queues"
     
-    process.nextTick callback is a "event queue" (MicroTask/setTimeout/setInterval/Close phase callbacks)
-    promise callbacks is a "MacroTask queue" (I/O, setImmediate)
-
     ORDER: 
-    Node checks for nextTick queue first, and process them until it's empty before moving to next "event loop phase"
-    1 process.nextTick callbacks -> 
-    2 resolved promises -> 
-    3 next event loop phase in main thread (if no event, it continues main eventloop which is main thread tasks) 
-    (this is how Async function works)
+    1. Node checks for Macro queue first, and process them until it's empty (if add a new event to queue, then it will be process before #2)
+    2. process Micro queues (if Macro event is added in #2, then after #2, it'll run #1 again)
 
-3. NextTick has limit of 1000 maximum events because it'll trigger a "starving" state which blocks any IO. 
-    nextTick is not really "immediate" because it trigger after eventloop clears events
-    setImmediate is actually more like a "next tick"
-    
+
+3. NextTick has limit of 1000 maximum events, because it could result a "starving" state which blocks any IO event 
 */

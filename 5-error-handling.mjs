@@ -115,3 +115,6 @@ Promise.allSettled(
     })
 })
 
+/* Complete error handling for JS
+https://www.valentinog.com/blog/error/
+-------------------------------------------------------- */

@@ -6,14 +6,15 @@ const tick = Date.now();
 const log = (v) => console.log(`${v} \n Elapsed: ${Date.now() - tick}ms`);
 
 const notBlocked_1 = async () => {
-    await Promise.resolve();
+    Promise.resolve(1).then(() => {
         let i = 0;
         while(i < 1000000000) { i++; }
         return '🐷 billion loops done 1';
+    });
 }
 
 const notBlocked_2 = async () => {
-    await Promise.resolve(); //use await
+    await Promise.resolve()
     let i = 0;
     while(i < 1000000000) { i++; }
     return '🐷 billion loops done 2';
