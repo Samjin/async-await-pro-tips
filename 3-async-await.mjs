@@ -33,20 +33,20 @@ export const getFruit = async name => {
 })()
 
 
-// const makeConcurrentWithMap = async () => {
-//   const request = users.map(async(user) => {
-//     return fetch(user.name); //concurrent, don't need AWAIT since we want to return promise, also we don't have anything after fetch() for processing.
-//   });
-//   let all = await Promise.all(request);
-//   return all
-// }
+const makeConcurrentWithMap = async () => {
+  const request = users.map(async(user) => {
+    return fetch(user.name); //concurrent, don't need AWAIT since we want to return promise, also we don't have anything after fetch() for processing.
+  });
+  let all = await Promise.all(request);
+  return all
+}
 
-// const makeSmoothieFaster = async() => {
-//   const a = getFruit('pineapple');
-//   const b = getFruit('strawberry'); //don't need await a, b since they are both promises
-//   const smoothie = await Promise.all([a, b])
-//   return smoothie;
-// }
+const makeSmoothieFaster = async() => {
+  const a = getFruit('pineapple');
+  const b = getFruit('strawberry'); //don't need await a, b since they are both promises
+  const smoothie = await Promise.all([a, b])
+  return smoothie;
+}
 
 
 // const fruitRace = async() => {
@@ -58,8 +58,8 @@ export const getFruit = async name => {
 //   return winner;
 // }
 
-// fruitRace().then(log)
-// fruitRace().then(log)
-// fruitRace().then(log)
-// fruitRace().then(log)
-// fruitRace().then(log)
+fruitRace().then(log)
+fruitRace().then(log)
+fruitRace().then(log)
+fruitRace().then(log)
+fruitRace().then(log)

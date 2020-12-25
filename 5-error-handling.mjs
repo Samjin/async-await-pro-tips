@@ -51,10 +51,9 @@ async function loadJson(name) { // (1)
     let response = await getFruit(name); // (2)
     if (response.status == 200) {
         // We can return response.json() instead of awaiting for it, like this:
-        // return response.json(); // (3) parent function of loadJson don't need await keyword since here returns data than promise
+        // return response.json(); // (3) parent function of loadJson don't need "await" keyword since here returns data than promise
 
-        let json = await response.json(); // (3)
-        return json;
+        return await response.json(); // (3)
     }
     throw new Error(response.status);
 }
@@ -74,7 +73,7 @@ Promise.all([
     new Promise(resolve => setTimeout(() => resolve(3), 1000))  // 3
 ]).then(alert); // 1,2,3 when promises are ready: each promise contributes an array member
 
-// All or Nothing
+// Return ALL or NOTHING
 // Promise.all rejects as a whole if any promise rejects. 
 Promise.all([
     new Promise((resolve, reject) => setTimeout(() => resolve(1), 1000)),

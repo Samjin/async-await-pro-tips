@@ -4,7 +4,7 @@ const fruits = ['peach', 'pineapple', 'strawberry'];
 
 /* for of vs map
 -------------------------------------------------------- */
-//sequential requests
+//SEQUENTIAL
 const fruitLoop = async () => {
   for (const f of fruits) {
     const emoji = await getFruit(f);
@@ -12,7 +12,7 @@ const fruitLoop = async () => {
   }
 };
 
-//concurrent
+//CONCURRENT 1
 const fruitLoop = async () => {
   for await (const key of fruits) {
     const emoji = await getFruit(f);
@@ -20,7 +20,7 @@ const fruitLoop = async () => {
   }
 };
 
-//concurrent
+//CONCURRENT 2
 const smoothie = fruits.map(async (el) => getFruit(el));
 await Promise.all(smoothie);
 
