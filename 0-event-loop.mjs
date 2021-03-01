@@ -1,27 +1,79 @@
 // L1
 console.log('🥪 Synchronous 1');
 
-// L2 Micro task
+// L2 Macro task
 setTimeout(_ => console.log(`🍅 Timeout 2`), 0);
 
-// L3 Macro task
+// L3 Micro task
 Promise.resolve().then(_ => console.log('🍍 Promise 3'));
 
 // L4
 console.log('🥪 Synchronous 4');
 
-// Macro task(promise is always before Micro task such as setTimeout)
+/* 
+    In the event loop:
+    1. If CallStack is empty (otherwise, it'll execute all functions in callstack one by one before running any queues)
+    2. nextTick queue (managed by node)
+    3. MicroTask queues (managed by v8)
+    4. Macro queues
+
+    Execution order
+    1. nextTick (rarely used since there isn't performance gain)
+    2. microTasks (mostly used)
+    3. timers (expired)
+    4. immediate
+
+*/
 
 
-/* More details
-https://www.youtube.com/watch?v=PNa9OMajw9w
+/* Must watch 
+https://www.youtube.com/watch?v=BeHj9UOuUZ0&ab_channel=codedamn
+https://stackoverflow.com/questions/55467033/difference-between-process-nexttick-and-queuemicrotask
 -------------------------------------------------------- */
-// Event loop phases. Callbacks of each phases executed before next phase
-1. setTimeout -> callbacks -> nextTick(MacroTask) queue -> dispatch to corresponding phase
-2. I/O request -> callbacks (Network/Disk/Child process/Promise etc) -> keep polling IO -> MicroTask queue -> dispatch to corresponding phase
-3. setImmediate -> callbacks -> MicroTask queue -> to corresponding phase
-4. close event -> callbacks -> nextTick(MacroTask) queue -> dispatch to corresponding phase
-// process.exit()
+
+// <button id="btn1">This is button one</button>
+// <button id="btn2">This is button two</button>
+
+function funcOne () {
+    setTimeout(()=> console.log('#1 timeout 1'), 0)
+    Promise.resolve().then(() => console.info('#1 promise 1'))
+    const promise = Promise.resolve()
+    setTimeout(()=> console.log('#1 timeout 2'), 0)
+    console.info('#1 main thread');
+    setTimeout(()=> promise.then(() => console.info('#1 promise 2')), 0)
+}
+
+function funcTwo () {
+    setTimeout(()=> console.log('#2 timeout 1'), 0)
+    Promise.resolve().then(() => console.info('#2 promise 1'))
+    const promise = Promise.resolve()
+    setTimeout(()=> console.log('#2 timeout 2'), 0)
+    console.info('#2 main thread');
+    setTimeout(()=> promise.then(() => console.info('#2 promise 2')), 0)
+}
+
+// const btn = document.getElementById('btn1')
+// btn.addEventListener('click', funcOne, false)
+// btn.addEventListener('click', funcTwo, false)
+
+// Example two: btn2.addEventListener('click', btn.click) //btn.click 
+
+/* 
+callstack = []
+taskQueues = []
+MicroTaskQueues = []
+
+#1 main thread
+#1 promise 1
+#2 main thread
+#2 promise 1
+#1 timeout 1
+#1 timeout 2
+#2 timeout 1
+#2 timeout 2
+#2 promise 2
+ */
+
 
 // IMPORTANT
 // https://blog.insiderattack.net/timers-immediates-and-process-nexttick-nodejs-event-loop-part-2-2c53fd511bb3
@@ -31,7 +83,7 @@ https://www.youtube.com/watch?v=PNa9OMajw9w
    But this doesn't change current Phase in the main event loop.
 
    fs.readFile(__filename,          //1. ReadFile is IO request, so we are at I/O phase 
-        () => {                     //2. Once the file is read, callback is register as an event in I/O queue (not macrotask queue)
+        () => {                     //2. Once the file is read, callback is registered as an event in I/O queue (not macrotask queue)
                                     //   if no other #1 events, Node will start execute IO queue, in this case the #2 callback
 
             setTimeout(() => {      //3. Add to Timer queue, then register callback as event to "nextTick MacroTask queues"
@@ -55,3 +107,12 @@ https://www.youtube.com/watch?v=PNa9OMajw9w
 
 3. NextTick has limit of 1000 maximum events, because it could result a "starving" state which blocks any IO event 
 */
+
+m1 
+m2
+t1
+m3 => t3
+m4
+m5
+t2
+t3
